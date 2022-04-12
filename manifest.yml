@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx-webapp
+  name: nginx-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-webapp
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx-webapp
+    spec:
+      containers:
+      #- image: gcr.io/staticweb-test/nginx-webapp:v1
+      - image: ang-nginx-ui:latest
+        name: webapp
+        # imagePullPolicy: Always
+        imagePullPolicy: Never
+        resources: {}
+        ports:
+          - containerPort: 80 
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-webapp
+  labels:
+    run: nginx-webapp
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    app: nginx-webapp
+  type: LoadBalancer
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-webapp-cluster-ip
+  labels:
+    # service-label-key: service-label-value 
+    run: nginx-webapp-cluster-ip
+spec:
+  type: ClusterIP
+  ports:
+  - name: cluster-ip-port
+    port: 80
+    protocol: TCP
+  selector:
+    #deployment-label-key: deployment-label-value
+    app: nginx-webapp
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-webapp-node-port
+  labels:
+    # service-label-key: service-label-value 
+    run: nginx-webapp-node-port
+spec:
+  type: NodePort
+  ports:
+  - name: node-port
+    port: 80
+    protocol: TCP
+    # assign node port or use auto-assigned port
+    nodePort: 30001
+  selector:
+    #deployment-label-key: deployment-label-value
+    app: nginx-webapp
